@@ -1,97 +1,96 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+﻿# ZestBasket — React Native Shopkeeper App
 
-# Getting Started
+The main app is now a **native React Native Android/iOS app**, not a WebView or a screenshot. All management screens use native controls. It starts in local demo mode, without a server. The older browser portal and backend remain in `frontend/` and `backend/`; they are optional and are not started by the native app.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Run Android
 
-## Step 1: Start Metro
+Use Node.js 22.13+ and the installed Android Studio SDK/JDK. Start an Android emulator, or connect an Android phone with USB debugging.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+```powershell
+npm.cmd install --cache .npm-cache
+npm.cmd start
 ```
 
-## Step 2: Build and run your app
+Keep that terminal open. In another terminal:
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```powershell
+npm.cmd run android
 ```
 
-### iOS
+`npm start` now starts **Metro**, as expected for React Native. `npm run portal` still starts the optional older browser application. No backend, database, API key or `.env` is needed for the native demo.
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+On macOS for iOS:
 
 ```sh
+npm install
+cd ios
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
 bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+cd ..
+npm start
+# another terminal:
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+iOS requires Xcode and has not been compiled on this Windows machine.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Demo
 
-## Step 3: Modify your app
+Tap **Login → Demo Login (For Testing)**, or use **03001234567 / ZestDemo123**. Demo rider OTP is **4587**. These are synthetic fixtures, not production authentication credentials.
 
-Now that you have successfully run the app, let's make changes!
+1. Dashboard → Inventory: search, filter, add/edit/delete products, choose a photo and review inventory history.
+2. Orders → New → Details → Accept → Start Preparing.
+3. Continue to Packing → check every item → Haan, Confirm Karo.
+4. Rider → enter `4587` → Verify OTP & Hand Over.
+5. Demo: Mark Delivered & Record Payment. Earnings, reports, notifications and stock update.
+6. Settings → change shop status, opening hours, holidays, address and service radius; create support tickets/replies; submit a verification document.
+7. Dashboard → Create Demo Order produces another order. Closed shops cannot receive or accept new orders; existing accepted orders remain accessible.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Demo changes and the local session persist in AsyncStorage after closing/reopening the app. Photos are resized and stored with local demo data. This storage is for a small demo, not a production catalogue. Register previews validated onboarding and saves a pending shop profile; it does not create a secure server account or store passwords. Demo Login resumes this local workspace.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Backend handoff
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Change `src/services/config.js`:
 
-## Congratulations! :tada:
+```js
+mode: 'api',
+baseURL: 'https://your-api.example.com/api',
+```
 
-You've successfully run and modified your React Native App. :partying_face:
+All screens use the same `request()` service, so they do not need to be rewritten. Android emulator localhost is `10.0.2.2`; a physical phone needs your computer's LAN address or HTTPS server. Authentication expects a server-managed cookie session. Use HTTPS outside local development.
 
-### Now what?
+See [the complete native API contract](docs/NATIVE_API.md) for endpoints, payloads, response shapes, ownership, OTP, stock and payment requirements. API mode has request timeouts, error/retry states, upload handling, pull-to-refresh and 15-second foreground polling. No live backend connection is claimed. Your backend remains your work, as requested.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## Verification
 
-# Troubleshooting
+Latest audit: [26-state coverage, fixes, new Restock Planner / Preparation Priority and remaining scope](docs/PROJECT_AUDIT_2026-11-02.md).
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```powershell
+npm.cmd test -- --runInBand --testTimeout=60000
+npm.cmd run lint
+npx.cmd tsc --noEmit
+npm.cmd run native:bundle
+# Android compile, from android/:
+.\gradlew.bat assembleDebug --no-daemon
+```
 
-# Learn More
+Tests exercise native navigation and the order workflow through preparation, checklist packing, rider handover and delivery, plus inventory search, profile, operating hours, closed/reopened status, reports, support, verification, notifications, sessions and logout. Service tests verify stock reservation/deduction, duplicate/invalid transitions, OTP attempts/reuse, audit history, earnings reconciliation, persistence rollback and route protection.
 
-To learn more about React Native, take a look at the following resources:
+See [all 26 screen states and verification scope](docs/NATIVE_VERIFICATION.md). Emulator/device screenshots at 390×844, real photo picker, platform share/print behavior, screen-reader focus and iOS runtime are not visually/device verified. Receipts generate an actual PDF file and open the native share sheet for saving/sharing; CSV reports use text sharing. Dedicated in-app printing is not implemented.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Structure
+
+- `App.jsx`: native entry.
+- `src/app/Portal.js`: native screen router, session shell, drawer, bottom tabs and feature screens.
+- `src/components/ui.js`: shared cards, gradients, forms, buttons, logo, loading/error/empty states and badges.
+- `src/services/client.js`: configurable API client and transactional local mock repository.
+- `src/services/seed.js`: synthetic demo data.
+- `src/services/media.js`: native image picker and upload adapter.
+- `src/components/branding.js`: native welcome/dashboard heroes, consistent avatars, brand logo and timed startup splash.
+- `src/assets/`: high-resolution transparent shopkeeper/rider artwork and the customer-matching shopkeeper icon. All hero wording and controls are native text; the reference collage is no longer rendered. See [asset prompts and platform icon sizes](src/assets/ASSETS.md).
+- `npm run assets:brand`: regenerate launcher densities and native splash images from the committed master assets. System fonts and product emoji fallbacks are still used.
+- `__tests__/`: native renderer integration and domain/service tests.
+
+Real account registration/login, secure password change, recovery SMS, server-side OTP verification, external support responses, verification decisions, push notifications, customer/rider portals and payment providers require your backend. Two-factor authentication is visibly disabled as Coming Soon. Demo payments do not transfer money. Shop name changes create a pending review request and do not bypass administrator approval.
+
+Documentation for the preserved browser project is in [WEB_PORTAL.md](docs/WEB_PORTAL.md); its instructions are separate from the React Native app above.

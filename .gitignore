@@ -73,3 +73,12 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+# ZestBasket local runtime
+frontend/dist/
+backend/data/
+backend/uploads/
+backend/.env
+frontend/.env
+.env
+.npm-cache/
+*.tsbuildinfo
